@@ -1,0 +1,67 @@
+name: Build & Release APK
+
+on:
+  push:
+    tags:
+      - 'v*'
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build Flutter APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build APK (Release)
+        run: flutter build apk --release
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MyMoney-Release-APK
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/app/outputs/flutter-apk/app-release.apk
+          name: Release ${{ github.ref_name }}
+          body: |
+            ### 🚀 Nueva Versión Disponble: ${{ github.ref_name }}
+            
+            Descarga directa del archivo APK para Android:
+            - **[app-release.apk](https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/app-release.apk)**
+            
+            #### 📱 ¿Cómo instalar en Android?
+            1. Descarga el archivo `.apk` directamente en tu dispositivo Android.
+            2. Abre el archivo descargado.
+            3. Si el sistema te lo solicita, permite la instalación desde tu navegador o gestor de archivos ("Orígenes desconocidos").
+            4. ¡Listo! Abre **My Money** y empieza a gestionar tus finanzas.
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
