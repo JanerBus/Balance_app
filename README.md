@@ -16,9 +16,21 @@
   <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License" />
 </p>
 
+<p align="center">
+  <a href="https://github.com/JanerBus/Balance_app/releases/latest/download/app-release.apk">
+    <img src="https://img.shields.io/badge/Descargar%20APK%20(Android)-v1.0.0-brightgreen?style=for-the-badge&logo=android&logoColor=white" alt="Descargar APK v1.0.0" />
+  </a>
+</p>
+
 ---
 
 ## 📥 ¿Cómo Descargar e Instalar la App?
+
+<p align="center">
+  <a href="https://github.com/JanerBus/Balance_app/releases/latest/download/app-release.apk">
+    <img src="https://img.shields.io/badge/Descarga%20Directa-app--release.apk%20(62%20MB)-2ea44f?style=for-the-badge&logo=android" alt="Descarga Directa APK" />
+  </a>
+</p>
 
 ¡Puedes instalar la app directamente en tu teléfono Android sin complicaciones!
 
