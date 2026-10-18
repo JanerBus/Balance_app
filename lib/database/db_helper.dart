@@ -500,4 +500,125 @@ class DBHelper {
     );
     return maps.map((m) => GoalTransactionModel.fromMap(m)).toList();
   }
+
+  // --- Backup & Restore ---
+
+  /// Obtiene un snapshot de todas las tablas en SQLite para exportación
+  Future<Map<String, List<Map<String, dynamic>>>> getAllTableData() async {
+    final db = await database;
+    return {
+      'accounts': await db.query('accounts'),
+      'transactions': await db.query('transactions'),
+      'debts': await db.query('debts'),
+      'debt_payments': await db.query('debt_payments'),
+      'budgets': await db.query('budgets'),
+      'recurring_transactions': await db.query('recurring_transactions'),
+      'savings_goals': await db.query('savings_goals'),
+      'goal_transactions': await db.query('goal_transactions'),
+    };
+  }
+
+  /// Restaura los datos en SQLite en una sola transacción atómica segura.
+  /// Si [isReplaceMode] es true, borra las tablas previamente.
+  /// Si es false (merge mode), inserta ignorando conflictos de clave primaria.
+  Future<int> restoreAllTableData(
+    Map<String, dynamic> tables, {
+    required bool isReplaceMode,
+  }) async {
+    final db = await database;
+    int totalInserted = 0;
+
+    await db.transaction((txn) async {
+      if (isReplaceMode) {
+        // Eliminar en orden estricto de dependencias foráneas
+        await txn.delete('goal_transactions');
+        await txn.delete('savings_goals');
+        await txn.delete('debt_payments');
+        await txn.delete('debts');
+        await txn.delete('transactions');
+        await txn.delete('recurring_transactions');
+        await txn.delete('budgets');
+        await txn.delete('accounts');
+      }
+
+      final conflict = isReplaceMode
+          ? ConflictAlgorithm.replace
+          : ConflictAlgorithm.ignore;
+
+      // Inserción en orden de integridad referencial:
+      // 1. Cuentas
+      final accounts = tables['accounts'] as List<dynamic>? ?? [];
+      for (final raw in accounts) {
+        if (raw is Map<String, dynamic>) {
+          await txn.insert('accounts', raw, conflictAlgorithm: conflict);
+          totalInserted++;
+        }
+      }
+
+      // 2. Deudas
+      final debts = tables['debts'] as List<dynamic>? ?? [];
+      for (final raw in debts) {
+        if (raw is Map<String, dynamic>) {
+          await txn.insert('debts', raw, conflictAlgorithm: conflict);
+          totalInserted++;
+        }
+      }
+
+      // 3. Pagos de Deudas
+      final debtPayments = tables['debt_payments'] as List<dynamic>? ?? [];
+      for (final raw in debtPayments) {
+        if (raw is Map<String, dynamic>) {
+          await txn.insert('debt_payments', raw, conflictAlgorithm: conflict);
+          totalInserted++;
+        }
+      }
+
+      // 4. Presupuestos
+      final budgets = tables['budgets'] as List<dynamic>? ?? [];
+      for (final raw in budgets) {
+        if (raw is Map<String, dynamic>) {
+          await txn.insert('budgets', raw, conflictAlgorithm: conflict);
+          totalInserted++;
+        }
+      }
+
+      // 5. Transacciones Recurrentes
+      final recurring = tables['recurring_transactions'] as List<dynamic>? ?? [];
+      for (final raw in recurring) {
+        if (raw is Map<String, dynamic>) {
+          await txn.insert('recurring_transactions', raw, conflictAlgorithm: conflict);
+          totalInserted++;
+        }
+      }
+
+      // 6. Metas de Ahorro
+      final goals = tables['savings_goals'] as List<dynamic>? ?? [];
+      for (final raw in goals) {
+        if (raw is Map<String, dynamic>) {
+          await txn.insert('savings_goals', raw, conflictAlgorithm: conflict);
+          totalInserted++;
+        }
+      }
+
+      // 7. Aportes a Metas de Ahorro
+      final goalTransactions = tables['goal_transactions'] as List<dynamic>? ?? [];
+      for (final raw in goalTransactions) {
+        if (raw is Map<String, dynamic>) {
+          await txn.insert('goal_transactions', raw, conflictAlgorithm: conflict);
+          totalInserted++;
+        }
+      }
+
+      // 8. Transacciones
+      final transactions = tables['transactions'] as List<dynamic>? ?? [];
+      for (final raw in transactions) {
+        if (raw is Map<String, dynamic>) {
+          await txn.insert('transactions', raw, conflictAlgorithm: conflict);
+          totalInserted++;
+        }
+      }
+    });
+
+    return totalInserted;
+  }
 }

@@ -29,6 +29,7 @@ import '../settings/notification_settings_screen.dart';
 import '../goals/goals_screen.dart';
 import '../debts/debts_screen.dart';
 import '../reports/reports_screen.dart';
+import '../settings/data_backup_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -275,6 +276,8 @@ class HomeScreen extends StatelessWidget {
                 AppWalkthroughSheet.show(context);
               } else if (val == 'glossary') {
                 ConceptGlossarySheet.show(context);
+              } else if (val == 'backup') {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const DataBackupScreen()));
               }
             },
             itemBuilder: (ctx) => [
@@ -353,6 +356,16 @@ class HomeScreen extends StatelessWidget {
                     Icon(Icons.account_balance_wallet_outlined, size: 18, color: Color(0xFF10B981)),
                     SizedBox(width: 10),
                     Text('Gestionar Cuentas', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'backup',
+                child: Row(
+                  children: [
+                    Icon(Icons.cloud_sync_outlined, size: 18, color: Color(0xFF0D9488)),
+                    SizedBox(width: 10),
+                    Text('Copia y Restauración', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
                   ],
                 ),
               ),

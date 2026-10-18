@@ -66,6 +66,11 @@ class NotificationSettingsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Recarga preferencias de notificaciones desde SharedPreferences
+  Future<void> reloadPreferences() async {
+    await _loadPreferences();
+  }
+
   Future<bool> requestPermission() async {
     final granted = await NotificationService.requestPermission();
     _isSystemPermissionGranted = granted;

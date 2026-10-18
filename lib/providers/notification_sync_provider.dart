@@ -488,6 +488,12 @@ class NotificationSyncProvider with ChangeNotifier {
     await prefs.setString(_keyPendingTransactions, jsonEncode(list));
   }
 
+  /// Recarga configuración y reglas aprendidas desde SharedPreferences
+  Future<void> reloadSettings() async {
+    await _init();
+    notifyListeners();
+  }
+
   @override
   void dispose() {
     _stopListening();

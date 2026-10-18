@@ -33,16 +33,23 @@ import 'package:personal_finance/providers/notification_settings_provider.dart';
 import 'package:personal_finance/providers/debt_provider.dart';
 import 'package:personal_finance/providers/currency_provider.dart';
 import 'package:personal_finance/providers/finance_provider.dart';
+import 'package:personal_finance/providers/budget_provider.dart';
+import 'package:personal_finance/providers/recurring_provider.dart';
 import 'package:personal_finance/providers/account_provider.dart';
 import 'package:personal_finance/providers/goal_provider.dart';
 import 'package:personal_finance/screens/goals/goals_screen.dart';
 import 'package:personal_finance/models/user_learned_rule.dart';
 import 'package:personal_finance/screens/splash/splash_screen.dart';
 import 'package:personal_finance/theme/app_theme.dart';
+import 'package:personal_finance/services/backup_service.dart';
+import 'package:personal_finance/screens/settings/data_backup_screen.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {
   setUpAll(() async {
     TestWidgetsFlutterBinding.ensureInitialized();
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
     await initializeDateFormatting('es');
   });
 
@@ -1668,6 +1675,196 @@ void main() {
       expect(finishedCalled, isTrue);
       expect(find.text('Auto Destination Screen'), findsOneWidget);
       expect(tester.takeException(), isNull);
+    });
+
+    test('BackupService validates JSON structure and parses metadata correctly', () {
+      const validJson = '''
+      {
+        "app": "My Money",
+        "schemaVersion": 1,
+        "exportedAt": "2026-10-18T16:00:00.000Z",
+        "tables": {
+          "accounts": [
+            {
+              "id": "acc-1",
+              "name": "Bancolombia",
+              "type": "savings",
+              "initialBalance": 100000.0,
+              "color": 4281743186,
+              "icon": "account_balance",
+              "includeInTotal": 1
+            }
+          ],
+          "transactions": [
+            {
+              "id": "tx-1",
+              "title": "Almuerzo",
+              "amount": 25000.0,
+              "type": "expense",
+              "category": "Alimentación",
+              "date": "2026-10-18T12:00:00.000Z",
+              "accountId": "acc-1"
+            }
+          ],
+          "debts": [],
+          "debt_payments": [],
+          "budgets": [],
+          "recurring_transactions": [],
+          "savings_goals": [],
+          "goal_transactions": []
+        },
+        "preferences": {
+          "selected_currency": "COP"
+        },
+        "userLearnedRules": []
+      }
+      ''';
+
+      final result = BackupService.validateAndSummarizeJson(validJson);
+      expect(result.isValid, isTrue);
+      expect(result.summary, isNotNull);
+      expect(result.summary!.accountsCount, 1);
+      expect(result.summary!.transactionsCount, 1);
+      expect(result.summary!.debtsCount, 0);
+      expect(result.summary!.app, 'My Money');
+      expect(result.summary!.totalRecords, 2);
+
+      // Test invalid JSON string
+      final invalidResult = BackupService.validateAndSummarizeJson('invalid-non-json');
+      expect(invalidResult.isValid, isFalse);
+      expect(invalidResult.errorMessage, isNotNull);
+
+      // Test JSON without tables key
+      final missingTablesResult = BackupService.validateAndSummarizeJson('{"app": "My Money"}');
+      expect(missingTablesResult.isValid, isFalse);
+      expect(missingTablesResult.errorMessage, contains('tablas'));
+    });
+
+    testWidgets('DataBackupScreen renders on 360x800 and 320x640 viewports without RenderFlex overflow', (WidgetTester tester) async {
+      tester.view.devicePixelRatio = 1.0;
+      tester.view.physicalSize = const Size(360, 800);
+      tester.view.viewInsets = FakeViewPadding.zero;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+        tester.view.resetViewInsets();
+      });
+
+      SharedPreferences.setMockInitialValues({});
+
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider(create: (_) => FinanceProvider()),
+            ChangeNotifierProvider(create: (_) => AccountProvider()),
+            ChangeNotifierProvider(create: (_) => DebtProvider()),
+            ChangeNotifierProvider(create: (_) => BudgetProvider()),
+            ChangeNotifierProvider(create: (_) => RecurringProvider()),
+            ChangeNotifierProvider(create: (_) => GoalProvider()),
+            ChangeNotifierProvider(create: (_) => NotificationSyncProvider()),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.dark(),
+            home: const DataBackupScreen(),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(find.text('Copia y Restauración'), findsOneWidget);
+      expect(find.text('Control Total de tus Datos'), findsOneWidget);
+      expect(find.text('EXPORTAR INFORMACIÓN'), findsOneWidget);
+      expect(find.text('IMPORTAR Y RESTAURAR'), findsOneWidget);
+      expect(find.text('Exportar y Compartir Archivo'), findsOneWidget);
+      expect(find.text('Copiar Respaldo al Portapapeles'), findsOneWidget);
+      expect(find.text('Seleccionar Archivo de Respaldo (.json)'), findsOneWidget);
+      expect(find.text('Pegar Respaldo desde Portapapeles'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+
+      // Test on ultra compact 320x640 viewport in Light theme
+      tester.view.physicalSize = const Size(320, 640);
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider(create: (_) => FinanceProvider()),
+            ChangeNotifierProvider(create: (_) => AccountProvider()),
+            ChangeNotifierProvider(create: (_) => DebtProvider()),
+            ChangeNotifierProvider(create: (_) => BudgetProvider()),
+            ChangeNotifierProvider(create: (_) => RecurringProvider()),
+            ChangeNotifierProvider(create: (_) => GoalProvider()),
+            ChangeNotifierProvider(create: (_) => NotificationSyncProvider()),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light(),
+            home: const DataBackupScreen(),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+      expect(find.text('Copia y Restauración'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    test('BackupService restoreBackup handles valid backup data in replace and merge mode', () async {
+      SharedPreferences.setMockInitialValues({
+        'selected_currency': 'COP',
+        'theme_mode': 'light',
+      });
+
+      final backupData = {
+        'app': 'My Money',
+        'schemaVersion': 1,
+        'tables': {
+          'accounts': [
+            {
+              'id': 'test-acc-1',
+              'name': 'Billetera Principal',
+              'type': 'cash',
+              'initialBalance': 50000.0,
+              'color': 4281743186,
+              'icon': 'payments',
+              'includeInTotal': 1,
+            }
+          ],
+          'transactions': [],
+          'debts': [],
+          'debt_payments': [],
+          'budgets': [],
+          'recurring_transactions': [],
+          'savings_goals': [],
+          'goal_transactions': [],
+        },
+        'preferences': {
+          'selected_currency': 'USD',
+          'theme_mode': 'dark',
+          'smart_alerts_enabled': true,
+        },
+        'userLearnedRules': [
+          {
+            'id': 'rule-1',
+            'name': 'Regla Test',
+            'bankName': 'Bancolombia',
+            'triggerKeywords': ['compra', 'qr'],
+            'type': 'expense',
+            'createdAt': DateTime.now().toIso8601String(),
+          }
+        ],
+      };
+
+      final result = await BackupService.restoreBackup(
+        backupData: backupData,
+        mode: ImportMode.replace,
+      );
+
+      expect(result.success, isTrue);
+      expect(result.importedCount, greaterThanOrEqualTo(1));
+
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getString('selected_currency'), 'USD');
+      expect(prefs.getString('theme_mode'), 'dark');
+      expect(prefs.getString('notification_sync_learned_rules'), contains('rule-1'));
     });
   });
 }

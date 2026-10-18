@@ -18,7 +18,7 @@
 
 <p align="center">
   <a href="https://github.com/JanerBus/Balance_app/releases/latest/download/app-release.apk">
-    <img src="https://img.shields.io/badge/Descargar%20APK%20(Android)-v1.0.0-brightgreen?style=for-the-badge&logo=android&logoColor=white" alt="Descargar APK v1.0.0" />
+    <img src="https://img.shields.io/badge/Descargar%20APK%20(Android)-v1.0.1-brightgreen?style=for-the-badge&logo=android&logoColor=white" alt="Descargar APK v1.0.1" />
   </a>
 </p>
 
@@ -82,7 +82,12 @@
 - Genera extractos financieros detallados en formato **PDF** listos para imprimir o compartir.
 - Exporta todas tus transacciones en formato **CSV** compatible con Excel y Google Sheets.
 
-### 🔒 9. Máxima Privacidad y Seguridad Local
+### 💾 9. Copia de Seguridad y Restauración Completa (JSON)
+- Exporta toda la base de datos de la app (cuentas, transacciones, deudas, metas, presupuestos y reglas aprendidas) en un archivo JSON portable.
+- Restaura tus copias en cualquier momento con opción de **Reemplazar** (restauración limpia) o **Combinar** (merge de registros).
+- Comparte o importa respaldos fácilmente desde cualquier ubicación con `file_picker` y `share_plus`.
+
+### 🔒 10. Máxima Privacidad y Seguridad Local
 - **100% Offline**: Tus datos financieros te pertenecen exclusivamente a ti. Se almacenan de forma local mediante **SQLite**, sin sincronizaciones con servidores de terceros.
 - Bloqueo biométrico con **Huella Digital / Face ID** o **código PIN de seguridad**.
 - Bloqueo automático al salir de la aplicación.

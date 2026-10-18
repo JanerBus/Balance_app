@@ -12,6 +12,7 @@ import '../../services/report_generator_service.dart';
 import '../../services/csv_export_service.dart';
 import '../../utils/formatters.dart';
 import 'pdf_preview_screen.dart';
+import '../settings/data_backup_screen.dart';
 
 enum CsvExportRange {
   selectedMonth,
@@ -490,6 +491,67 @@ class _ReportsScreenState extends State<ReportsScreen> {
                       elevation: 0,
                     ),
                   ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Banner Copia de Seguridad Completa (JSON)
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: isDark ? Colors.white.withValues(alpha: 0.08) : const Color(0xFFCBD5E1),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF6366F1).withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.cloud_sync_rounded, color: Color(0xFF6366F1), size: 22),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Copia de Seguridad Completa',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: colorScheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Exporta o restaura toda tu base de datos en formato JSON portable.',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                TextButton(
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const DataBackupScreen()),
+                    );
+                  },
+                  child: const Text('Abrir', style: TextStyle(fontWeight: FontWeight.w700)),
                 ),
               ],
             ),
