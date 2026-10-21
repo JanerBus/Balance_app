@@ -24,28 +24,6 @@
 
 ---
 
-## 📥 ¿Cómo Descargar e Instalar la App?
-
-<p align="center">
-  <a href="https://github.com/JanerBus/Balance_app/releases/latest/download/app-release.apk">
-    <img src="https://img.shields.io/badge/Descarga%20Directa-app--release.apk%20(62%20MB)-2ea44f?style=for-the-badge&logo=android" alt="Descarga Directa APK" />
-  </a>
-</p>
-
-¡Puedes instalar la app directamente en tu teléfono Android sin complicaciones!
-
-### Opción 1: Descarga Directa desde GitHub Releases (Recomendada)
-1. Ve a la sección de **[Releases / Lanzamientos](https://github.com/JanerBus/Balance_app/releases)**.
-2. Descarga el archivo **`app-release.apk`** de la versión más reciente.
-3. Abre el archivo descargado en tu celular.
-4. Si Android muestra una advertencia de seguridad:
-   - Toca en **Configuración / Ajustes**.
-   - Habilita la opción **"Permitir desde esta fuente"** (o "Instalar aplicaciones desconocidas").
-   - Presiona **Instalar** (si Google Play Protect te avisa, toca en *"Instalar de todas formas"*).
-5. ¡Listo! Abre **My Money** y empieza a gestionar tus finanzas.
-
----
-
 ## ✨ Características Principales
 
 ### 📊 1. Registro Ágil de Transacciones y Presupuestos
