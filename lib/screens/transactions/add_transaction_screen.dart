@@ -19,6 +19,7 @@ class AddTransactionScreen extends StatefulWidget {
   final String? initialToAccountId;
   final double? initialAmount;
   final String? initialTitle;
+  final String? initialCategory;
 
   const AddTransactionScreen({
     super.key,
@@ -28,6 +29,7 @@ class AddTransactionScreen extends StatefulWidget {
     this.initialToAccountId,
     this.initialAmount,
     this.initialTitle,
+    this.initialCategory,
   });
 
   @override
@@ -100,9 +102,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       if (widget.initialToAccountId != null) {
         _selectedToAccountId = widget.initialToAccountId;
       }
-      _selectedCategory = _type == TransactionType.income
-          ? AppCategories.incomeCategories.first.name
-          : AppCategories.expenseCategories.first.name;
+      _selectedCategory = widget.initialCategory ??
+          (_type == TransactionType.income
+              ? AppCategories.incomeCategories.first.name
+              : AppCategories.expenseCategories.first.name);
     }
   }
 

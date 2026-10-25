@@ -7,6 +7,7 @@ import '../screens/transactions/add_transaction_screen.dart';
 import '../screens/goals/add_edit_goal_screen.dart';
 import '../screens/debts/add_debt_screen.dart';
 import '../screens/settings/bank_sync_screen.dart';
+import '../screens/assistant/ai_assistant_screen.dart';
 import '../widgets/financial_calculator_sheet.dart';
 
 class QuickActionSheet extends StatelessWidget {
@@ -215,6 +216,63 @@ class QuickActionSheet extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+
+          const SizedBox(height: 12),
+
+          // Banner Asistente IA
+          InkWell(
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AiAssistantScreen()),
+              );
+            },
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: isDark
+                      ? [const Color(0xFF1E1B4B), const Color(0xFF312E81)]
+                      : [const Color(0xFFEEF2FF), const Color(0xFFE0E7FF)],
+                ),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: const Color(0xFF6366F1).withValues(alpha: 0.35),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(7),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF6366F1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 18),
+                  ),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Asistente Inteligente IA',
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                        ),
+                        Text(
+                          'Registra por voz o texto y consulta tu dinero',
+                          style: TextStyle(fontSize: 11, color: Color(0xFF6366F1)),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.chevron_right_rounded, color: Color(0xFF6366F1), size: 18),
+                ],
+              ),
+            ),
           ),
 
           // Bank sync alert pill if pending transactions exist

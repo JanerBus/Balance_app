@@ -18,6 +18,7 @@ import 'settings/bank_sync_screen.dart';
 import 'budgets/budgets_screen.dart';
 import 'debts/debts_screen.dart';
 import 'recurring/recurring_screen.dart';
+import 'assistant/ai_assistant_screen.dart';
 import '../widgets/quick_action_sheet.dart';
 import '../widgets/app_walkthrough_sheet.dart';
 
@@ -149,6 +150,10 @@ class _MainNavigationState extends State<MainNavigation> {
       extendBody: true,
       resizeToAvoidBottomInset: false,
       body: IndexedStack(index: _currentIndex, children: _screens),
+      floatingActionButton: isKeyboardOpen
+          ? null
+          : _buildAiFloatingActionButton(context, isDark),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       bottomNavigationBar: isKeyboardOpen
           ? null
           : SafeArea(
@@ -299,6 +304,74 @@ class _MainNavigationState extends State<MainNavigation> {
         ),
         child: const Center(
           child: Icon(Icons.add_rounded, color: Colors.white, size: 26),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAiFloatingActionButton(BuildContext context, bool isDark) {
+    return Semantics(
+      button: true,
+      label: 'Asistente IA. Abre el asistente inteligente de finanzas',
+      child: Tooltip(
+        message: 'Asistente IA',
+        child: Material(
+          elevation: 0,
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(24),
+          child: InkWell(
+            onTap: () {
+              HapticFeedback.lightImpact();
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AiAssistantScreen()),
+              );
+            },
+            borderRadius: BorderRadius.circular(24),
+            child: Container(
+              height: 48,
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+                ),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: isDark ? 0.3 : 0.45),
+                  width: 1.2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF6366F1).withValues(alpha: isDark ? 0.5 : 0.35),
+                    blurRadius: 14,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.auto_awesome_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                  SizedBox(width: 6),
+                  Text(
+                    'IA',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 13,
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
     );

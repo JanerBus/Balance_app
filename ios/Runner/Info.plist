@@ -59,6 +59,10 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>My Money requiere acceso al micrófono para registrar gastos e ingresos por dictado de voz.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>My Money usa reconocimiento de voz para convertir tus palabras en movimientos financieros.</string>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

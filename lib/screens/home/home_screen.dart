@@ -30,6 +30,7 @@ import '../goals/goals_screen.dart';
 import '../debts/debts_screen.dart';
 import '../reports/reports_screen.dart';
 import '../settings/data_backup_screen.dart';
+import '../assistant/ai_assistant_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -262,7 +263,9 @@ class HomeScreen extends StatelessWidget {
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             onSelected: (val) {
               HapticFeedback.lightImpact();
-              if (val == 'theme') {
+              if (val == 'ai') {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const AiAssistantScreen()));
+              } else if (val == 'theme') {
                 context.read<ThemeProvider>().toggleDarkMode();
               } else if (val == 'security') {
                 Navigator.push(context, MaterialPageRoute(builder: (_) => const SecuritySettingsScreen()));
@@ -281,6 +284,16 @@ class HomeScreen extends StatelessWidget {
               }
             },
             itemBuilder: (ctx) => [
+              PopupMenuItem(
+                value: 'ai',
+                child: Row(
+                  children: [
+                    const Icon(Icons.auto_awesome_rounded, size: 18, color: Color(0xFF6366F1)),
+                    const SizedBox(width: 10),
+                    const Text('Asistente IA', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              ),
               PopupMenuItem(
                 value: 'tour',
                 child: Row(
@@ -613,13 +626,14 @@ class HomeScreen extends StatelessWidget {
     final prefix = isIncome ? '↑' : '↓';
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(
         color: color.withValues(alpha: isDark ? 0.15 : 0.08),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: color.withValues(alpha: isDark ? 0.25 : 0.18)),
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             prefix,
@@ -629,13 +643,17 @@ class HomeScreen extends StatelessWidget {
               color: color,
             ),
           ),
-          const SizedBox(width: 5),
-          Text(
-            '$label: ',
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: isDark ? Colors.white70 : Colors.black54,
+          const SizedBox(width: 4),
+          Flexible(
+            child: Text(
+              '$label: ',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: isDark ? Colors.white70 : Colors.black54,
+              ),
             ),
           ),
           Expanded(
@@ -657,45 +675,52 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildQuickActionsBar(BuildContext context, bool isDark) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        _buildQuickActionButton(
-          context,
-          label: 'Gasto',
-          icon: Icons.arrow_upward_rounded,
-          color: const Color(0xFFF43F5E),
-          isDark: isDark,
-          onTap: () => _openAdd(context, TransactionType.expense),
+        Expanded(
+          child: _buildQuickActionButton(
+            context,
+            label: 'Gasto',
+            icon: Icons.arrow_upward_rounded,
+            color: const Color(0xFFF43F5E),
+            isDark: isDark,
+            onTap: () => _openAdd(context, TransactionType.expense),
+          ),
         ),
-        _buildQuickActionButton(
-          context,
-          label: 'Ingreso',
-          icon: Icons.arrow_downward_rounded,
-          color: const Color(0xFF10B981),
-          isDark: isDark,
-          onTap: () => _openAdd(context, TransactionType.income),
+        Expanded(
+          child: _buildQuickActionButton(
+            context,
+            label: 'Ingreso',
+            icon: Icons.arrow_downward_rounded,
+            color: const Color(0xFF10B981),
+            isDark: isDark,
+            onTap: () => _openAdd(context, TransactionType.income),
+          ),
         ),
-        _buildQuickActionButton(
-          context,
-          label: 'Transferir',
-          icon: Icons.swap_horiz_rounded,
-          color: const Color(0xFF6366F1),
-          isDark: isDark,
-          onTap: () => _openAdd(context, TransactionType.transfer),
+        Expanded(
+          child: _buildQuickActionButton(
+            context,
+            label: 'Transferir',
+            icon: Icons.swap_horiz_rounded,
+            color: const Color(0xFF6366F1),
+            isDark: isDark,
+            onTap: () => _openAdd(context, TransactionType.transfer),
+          ),
         ),
-        _buildQuickActionButton(
-          context,
-          label: 'Metas',
-          icon: Icons.flag_rounded,
-          color: const Color(0xFF8B5CF6),
-          isDark: isDark,
-          onTap: () {
-            HapticFeedback.lightImpact();
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const GoalsScreen()),
-            );
-          },
+        Expanded(
+          child: _buildQuickActionButton(
+            context,
+            label: 'Metas',
+            icon: Icons.flag_rounded,
+            color: const Color(0xFF8B5CF6),
+            isDark: isDark,
+            onTap: () {
+              HapticFeedback.lightImpact();
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const GoalsScreen()),
+              );
+            },
+          ),
         ),
       ],
     );
@@ -710,6 +735,7 @@ class HomeScreen extends StatelessWidget {
     required VoidCallback onTap,
   }) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         InkWell(
           onTap: () {
@@ -718,11 +744,11 @@ class HomeScreen extends StatelessWidget {
           },
           borderRadius: BorderRadius.circular(22),
           child: Container(
-            width: 58,
-            height: 58,
+            width: 52,
+            height: 52,
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF161D2B) : const Color(0xFFF1F5F9),
-              borderRadius: BorderRadius.circular(22),
+              borderRadius: BorderRadius.circular(20),
               border: Border.all(
                 color: isDark ? Colors.white.withValues(alpha: 0.08) : const Color(0xFFE2E8F0),
               ),
@@ -734,17 +760,21 @@ class HomeScreen extends StatelessWidget {
                 ),
               ],
             ),
-            child: Icon(icon, color: color, size: 24),
+            child: Icon(icon, color: color, size: 22),
           ),
         ),
         const SizedBox(height: 6),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-            letterSpacing: -0.2,
-            color: isDark ? Colors.white70 : const Color(0xFF334155),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            label,
+            maxLines: 1,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.2,
+              color: isDark ? Colors.white70 : const Color(0xFF334155),
+            ),
           ),
         ),
       ],
@@ -850,13 +880,18 @@ class HomeScreen extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              'Salud Financiera',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.4,
-                  ),
+            Expanded(
+              child: Text(
+                'Salud Financiera',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.4,
+                    ),
+              ),
             ),
+            const SizedBox(width: 8),
             InkWell(
               onTap: () {
                 HapticFeedback.lightImpact();
@@ -1207,23 +1242,30 @@ class HomeScreen extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Movimientos Recientes',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.4,
-                      ),
-                ),
-                if (selectedAccountName != null)
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    'Filtrado por: $selectedAccountName',
-                    style: const TextStyle(fontSize: 11, color: Color(0xFF6366F1), fontWeight: FontWeight.w600),
+                    'Movimientos Recientes',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.4,
+                        ),
                   ),
-              ],
+                  if (selectedAccountName != null)
+                    Text(
+                      'Filtrado por: $selectedAccountName',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 11, color: Color(0xFF6366F1), fontWeight: FontWeight.w600),
+                    ),
+                ],
+              ),
             ),
+            const SizedBox(width: 8),
             TextButton(
               onPressed: () {
                 HapticFeedback.lightImpact();

@@ -18,7 +18,7 @@
 
 <p align="center">
   <a href="https://github.com/JanerBus/Balance_app/releases/latest/download/app-release.apk">
-    <img src="https://img.shields.io/badge/Descargar%20APK%20(Android)-v1.0.1-brightgreen?style=for-the-badge&logo=android&logoColor=white" alt="Descargar APK v1.0.1" />
+    <img src="https://img.shields.io/badge/Descargar%20APK%20(Android)-v1.1.0-brightgreen?style=for-the-badge&logo=android&logoColor=white" alt="Descargar APK v1.1.0" />
   </a>
 </p>
 
@@ -65,8 +65,15 @@
 - Restaura tus copias en cualquier momento con opción de **Reemplazar** (restauración limpia) o **Combinar** (merge de registros).
 - Comparte o importa respaldos fácilmente desde cualquier ubicación con `file_picker` y `share_plus`.
 
-### 🔒 10. Máxima Privacidad y Seguridad Local
-- **100% Offline**: Tus datos financieros te pertenecen exclusivamente a ti. Se almacenan de forma local mediante **SQLite**, sin sincronizaciones con servidores de terceros.
+### 🤖 10. Asistente Financiero con Voz e Inteligencia Artificial
+- Interactúa mediante texto o **comandos de voz** con reconocimiento de habla integrado (`speech_to_text`).
+- Registra transacciones con lenguaje natural cotidiano (ej: *"Gasté 45 mil en el almuerzo de hoy con Bancolombia"*).
+- Consulta al instante tu balance general, desglose de gastos, estado de presupuestos o próximas cuotas de deudas.
+- Recibe consejos financieros personalizados y adaptados a tus patrones de ahorro y consumo.
+- Modo Híbrido: Motor NLP local sin conexión y opción de conectar tu API Key de Gemini para razonamiento profundo.
+
+### 🔒 11. Máxima Privacidad y Seguridad Local
+- **100% Offline**: Tus datos financieros te pertenecen exclusivamente a ti. Se almacenan de forma local mediante **SQLite**, sin sincronizaciones obligatorias con servidores de terceros.
 - Bloqueo biométrico con **Huella Digital / Face ID** o **código PIN de seguridad**.
 - Bloqueo automático al salir de la aplicación.
 

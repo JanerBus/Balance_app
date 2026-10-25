@@ -41,8 +41,12 @@ import 'package:personal_finance/screens/goals/goals_screen.dart';
 import 'package:personal_finance/models/user_learned_rule.dart';
 import 'package:personal_finance/screens/splash/splash_screen.dart';
 import 'package:personal_finance/theme/app_theme.dart';
+import 'package:personal_finance/providers/theme_provider.dart';
 import 'package:personal_finance/services/backup_service.dart';
 import 'package:personal_finance/screens/settings/data_backup_screen.dart';
+import 'package:personal_finance/services/ai_assistant_service.dart';
+import 'package:personal_finance/screens/assistant/ai_assistant_screen.dart';
+import 'package:personal_finance/screens/main_navigation.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {
@@ -1865,6 +1869,333 @@ void main() {
       expect(prefs.getString('selected_currency'), 'USD');
       expect(prefs.getString('theme_mode'), 'dark');
       expect(prefs.getString('notification_sync_learned_rules'), contains('rule-1'));
+    });
+    test('AiAssistantService NLP parser parses natural language and Colombian slang correctly', () {
+      final context = AiFinancialContext(
+        totalBalance: 2500000.0,
+        monthIncome: 3000000.0,
+        monthExpense: 1200000.0,
+        accounts: const [
+          AccountModel(
+            id: 'acc-nequi',
+            name: 'Nequi',
+            type: AccountType.bank,
+            color: 0xFF10B981,
+            icon: 'wallet',
+            currentBalance: 450000.0,
+          ),
+          AccountModel(
+            id: 'acc-cash',
+            name: 'Efectivo',
+            type: AccountType.cash,
+            color: 0xFF3B82F6,
+            icon: 'payments',
+            currentBalance: 120000.0,
+          ),
+          AccountModel(
+            id: 'acc-bancolombia',
+            name: 'Bancolombia',
+            type: AccountType.bank,
+            color: 0xFFF59E0B,
+            icon: 'account_balance',
+            currentBalance: 1930000.0,
+          ),
+        ],
+        recentTransactions: [
+          TransactionModel(
+            id: 't-1',
+            title: 'Almuerzo corriente',
+            amount: 25000.0,
+            type: TransactionType.expense,
+            category: 'Alimentación',
+            date: DateTime.now(),
+            accountId: 'acc-nequi',
+          ),
+        ],
+        budgets: [
+          BudgetModel(
+            id: 'b-1',
+            category: 'Alimentación',
+            amount: 500000.0,
+            month: DateTime.now().month,
+            year: DateTime.now().year,
+          ),
+        ],
+        debts: [
+          DebtModel(
+            id: 'd-1',
+            personName: 'Carlos M.',
+            amount: 50000.0,
+            type: DebtType.iOwe,
+            createdDate: DateTime.now(),
+          ),
+        ],
+        currency: CurrencyModel.defaultCurrency,
+      );
+
+      // 1. Gasto con "mil" y Nequi
+      final res1 = AiAssistantService.parseLocalNLP(
+        input: 'Ayer gasté 35 mil en pizza con Nequi',
+        context: context,
+      );
+      expect(res1.intent, AiIntentType.addTransaction);
+      expect(res1.transaction, isNotNull);
+      expect(res1.transaction!.amount, 35000.0);
+      expect(res1.transaction!.category, 'Alimentación');
+      expect(res1.transaction!.type, TransactionType.expense);
+      expect(res1.transaction!.accountName, 'Nequi');
+      expect(res1.transaction!.accountId, 'acc-nequi');
+
+      // 2. Gasto con separador de miles "12.000" y efectivo
+      final res2 = AiAssistantService.parseLocalNLP(
+        input: 'Pagué 12.000 de taxi en efectivo',
+        context: context,
+      );
+      expect(res2.intent, AiIntentType.addTransaction);
+      expect(res2.transaction, isNotNull);
+      expect(res2.transaction!.amount, 12000.0);
+      expect(res2.transaction!.category, 'Transporte');
+      expect(res2.transaction!.type, TransactionType.expense);
+      expect(res2.transaction!.accountName, 'Efectivo');
+
+      // 3. Ingreso con "millones"
+      final res3 = AiAssistantService.parseLocalNLP(
+        input: 'Me pagaron 1.5 millones de sueldo hoy',
+        context: context,
+      );
+      expect(res3.intent, AiIntentType.addTransaction);
+      expect(res3.transaction, isNotNull);
+      expect(res3.transaction!.amount, 1500000.0);
+      expect(res3.transaction!.type, TransactionType.income);
+      expect(res3.transaction!.category, 'Salario');
+
+      // 4. Gasto con "k"
+      final res4 = AiAssistantService.parseLocalNLP(
+        input: 'Gasté 50k en compras de ropa',
+        context: context,
+      );
+      expect(res4.intent, AiIntentType.addTransaction);
+      expect(res4.transaction, isNotNull);
+      expect(res4.transaction!.amount, 50000.0);
+      expect(res4.transaction!.category, 'Compras');
+    });
+
+    test('AiAssistantService generates accurate financial insights and advice', () {
+      final context = AiFinancialContext(
+        totalBalance: 2500000.0,
+        monthIncome: 3000000.0,
+        monthExpense: 1200000.0,
+        accounts: const [
+          AccountModel(
+            id: 'acc-nequi',
+            name: 'Nequi',
+            type: AccountType.bank,
+            color: 0xFF10B981,
+            icon: 'wallet',
+            currentBalance: 450000.0,
+          ),
+        ],
+        recentTransactions: [
+          TransactionModel(
+            id: 't-1',
+            title: 'Almuerzo',
+            amount: 450000.0,
+            type: TransactionType.expense,
+            category: 'Alimentación',
+            date: DateTime.now(),
+            accountId: 'acc-nequi',
+          ),
+        ],
+        budgets: [
+          BudgetModel(
+            id: 'b-1',
+            category: 'Alimentación',
+            amount: 400000.0,
+            month: DateTime.now().month,
+            year: DateTime.now().year,
+          ),
+        ],
+        debts: [
+          DebtModel(
+            id: 'd-1',
+            personName: 'Carlos M.',
+            amount: 50000.0,
+            type: DebtType.iOwe,
+            createdDate: DateTime.now(),
+          ),
+        ],
+        currency: CurrencyModel.defaultCurrency,
+      );
+
+      // Consulta de saldo
+      final balanceRes = AiAssistantService.parseLocalNLP(input: '¿Cuál es mi saldo total?', context: context);
+      expect(balanceRes.intent, AiIntentType.queryBalance);
+      expect(balanceRes.message, contains('Tu Balance Total'));
+
+      // Consulta de gastos
+      final expenseRes = AiAssistantService.parseLocalNLP(input: '¿En qué gasté más este mes?', context: context);
+      expect(expenseRes.intent, AiIntentType.queryExpenses);
+      expect(expenseRes.message, contains('Alimentación'));
+
+      // Consulta de presupuestos (alerta de excedido)
+      final budgetRes = AiAssistantService.parseLocalNLP(input: '¿Cómo van mis presupuestos?', context: context);
+      expect(budgetRes.intent, AiIntentType.queryBudgets);
+      expect(budgetRes.message, contains('Excedido'));
+
+      // Consulta de deudas
+      final debtRes = AiAssistantService.parseLocalNLP(input: '¿Cuánto debo?', context: context);
+      expect(debtRes.intent, AiIntentType.queryDebts);
+      expect(debtRes.message, contains('Carlos M.'));
+
+      // Consejos
+      final adviceRes = AiAssistantService.parseLocalNLP(input: 'Consejos para ahorrar dinero', context: context);
+      expect(adviceRes.intent, AiIntentType.advice);
+      expect(adviceRes.message, contains('Consejos'));
+    });
+
+    testWidgets('AiAssistantScreen renders and handles interactions on 360x800 and 320x640 viewports', (tester) async {
+      SharedPreferences.setMockInitialValues({});
+      final financeProvider = FinanceProvider();
+      final accountProvider = AccountProvider();
+      final budgetProvider = BudgetProvider();
+      final debtProvider = DebtProvider();
+      final currencyProvider = CurrencyProvider();
+      final themeProvider = ThemeProvider();
+
+      Widget createWidget() {
+        return MultiProvider(
+          providers: [
+            ChangeNotifierProvider.value(value: financeProvider),
+            ChangeNotifierProvider.value(value: accountProvider),
+            ChangeNotifierProvider.value(value: budgetProvider),
+            ChangeNotifierProvider.value(value: debtProvider),
+            ChangeNotifierProvider.value(value: currencyProvider),
+            ChangeNotifierProvider.value(value: themeProvider),
+          ],
+          child: const MaterialApp(
+            home: AiAssistantScreen(),
+          ),
+        );
+      }
+
+      // 1. Probar en viewport compacto 320x640
+      tester.view.physicalSize = const Size(320, 640);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      await tester.pumpWidget(createWidget());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Asistente IA'), findsOneWidget);
+      expect(find.byType(TextField), findsOneWidget);
+      expect(find.byIcon(Icons.mic_none_rounded), findsOneWidget);
+
+      // 2. Probar en 360x800
+      tester.view.physicalSize = const Size(360, 800);
+      await tester.pumpWidget(createWidget());
+      await tester.pumpAndSettle();
+
+      // Probar apertura de modal de dictado por voz
+      await tester.tap(find.byIcon(Icons.mic_none_rounded));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Micrófono'), findsOneWidget);
+      await tester.tap(find.text('Cerrar'));
+      await tester.pumpAndSettle();
+
+      // Enviar un mensaje de gasto
+      await tester.enterText(find.byType(TextField), 'Ayer gasté 35 mil en pizza con Nequi');
+      await tester.tap(find.byIcon(Icons.arrow_upward_rounded));
+      await tester.pumpAndSettle();
+
+      // Debe aparecer la tarjeta de confirmación
+      expect(find.text('Registrar movimiento'), findsOneWidget);
+      expect(find.text('Pizza'), findsOneWidget);
+
+      // Confirmar registro con 1-tap
+      final btnFinder = find.widgetWithText(FilledButton, 'Registrar movimiento');
+      await tester.runAsync(() async {
+        await tester.tap(btnFinder);
+        await Future.delayed(const Duration(milliseconds: 300));
+      });
+      await tester.pumpAndSettle();
+
+      // Debe mostrar el estado confirmado
+      expect(find.text('Registrado en My Money'), findsOneWidget);
+    });
+
+    testWidgets('MainNavigation renders AI floating button near bottom bar and handles navigation and keyboard visibility', (tester) async {
+      tester.view.physicalSize = const Size(360, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.view.resetViewInsets);
+
+      SharedPreferences.setMockInitialValues({
+        'has_seen_app_walkthrough_v1': true,
+      });
+
+      final financeProvider = FinanceProvider();
+      final accountProvider = AccountProvider();
+      final budgetProvider = BudgetProvider();
+      final recurringProvider = RecurringProvider();
+      final debtProvider = DebtProvider();
+      final currencyProvider = CurrencyProvider();
+      final notifSettings = NotificationSettingsProvider();
+      final syncProvider = NotificationSyncProvider();
+      final securityProvider = SecurityProvider();
+      final themeProvider = ThemeProvider();
+      final goalProvider = MockGoalProvider();
+
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider.value(value: financeProvider),
+            ChangeNotifierProvider.value(value: accountProvider),
+            ChangeNotifierProvider.value(value: budgetProvider),
+            ChangeNotifierProvider.value(value: recurringProvider),
+            ChangeNotifierProvider.value(value: debtProvider),
+            ChangeNotifierProvider.value(value: currencyProvider),
+            ChangeNotifierProvider.value(value: notifSettings),
+            ChangeNotifierProvider.value(value: syncProvider),
+            ChangeNotifierProvider.value(value: securityProvider),
+            ChangeNotifierProvider.value(value: themeProvider),
+            ChangeNotifierProvider<GoalProvider>.value(value: goalProvider),
+          ],
+          child: const MaterialApp(
+            home: MainNavigation(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // 1. Verify floating AI button exists with 'IA' text and sparkles icon
+      final fabFinder = find.byTooltip('Asistente IA');
+      expect(fabFinder, findsOneWidget);
+      expect(find.text('IA'), findsOneWidget);
+      expect(find.byIcon(Icons.auto_awesome_rounded), findsWidgets);
+      expect(tester.takeException(), isNull);
+
+      // 2. Test ultra compact viewport 320x640
+      tester.view.physicalSize = const Size(320, 640);
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+
+      // 3. Test keyboard active: floating button should be hidden
+      tester.view.viewInsets = const FakeViewPadding(bottom: 340.0);
+      await tester.pumpAndSettle();
+      expect(find.byTooltip('Asistente IA'), findsNothing);
+
+      // Dismiss keyboard: floating button reappears
+      tester.view.viewInsets = FakeViewPadding.zero;
+      await tester.pumpAndSettle();
+      expect(find.byTooltip('Asistente IA'), findsOneWidget);
+
+      // 4. Tap the AI floating button to navigate to AiAssistantScreen
+      await tester.tap(find.byTooltip('Asistente IA'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AiAssistantScreen), findsOneWidget);
+      expect(find.text('Asistente IA'), findsOneWidget);
     });
   });
 }
